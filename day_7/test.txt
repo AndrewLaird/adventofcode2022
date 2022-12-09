@@ -1,0 +1,101 @@
+use std::collections::HashMap;
+use std::fs;
+fn read_input_file()->String{
+    let file_path = "src/input.txt";
+    println!("Reading from file {:?}", file_path);
+    let contents = fs::read_to_string(file_path).expect("Oh no we didn't find anything");
+    return contents;
+}
+
+
+
+// Definition of a graph node
+struct Node {
+    val: String, 
+    children: Vec<Node>,
+    parent: Box::<Option<Node>>,
+}
+
+impl Node{
+    fn new(val: String, parent: Box<Option<Node>> ) -> Self {
+        Node {
+            val,
+            children: vec![],
+            parent,
+        }
+    }
+    fn bidirectonal_add_and_create(parent: Node, child_string: String){
+        // make a child node and push it
+        parent.children.push(Node::new(child_string, Box::new(Some(parent))));
+    }
+}
+
+// Definition of a graph
+struct Tree {
+    nodes: HashMap<i32, Node>,
+}
+
+impl Tree {
+    fn new() -> Self {
+        Tree {
+            nodes: HashMap::new(),
+        }
+    }
+
+    // Add a node to the graph
+    fn add_node(&mut self, id: i32, node: Node) {
+        self.nodes.insert(id, node);
+    }
+
+    // Add a connection between two nodes in the graph
+    fn add_connection(&mut self, from: i32, to: i32) {
+        let from_node = self.nodes.get_mut(&from).unwrap();
+        from_node.children.push(to);
+    }
+}
+
+fn problem_1(input: &String) -> i32 {
+   let commands: Vec<Vec<&str>> = input.split("\n").filter(|string| string.len() > 0).map(|x| x.split(" ").collect()).collect();
+   let tree = Tree::new();
+   let mut current_location = Node::new("/".to_string(), Box::new(None));
+   let head = Box::new(current_location);
+    
+    for command in commands{
+        match command[0]{
+            "$" => {
+                match command[1] {
+                    "cd" => {
+                        match command[2] {
+                            ".." => {
+                                current_location = current_location.parent;
+                            }
+                            _ => {
+                            Node::bidirectonal_add_and_create(current_location, command[2].to_string());
+                            current_location = current_location.children
+
+                            }
+                        }
+                    }
+                    "ls" => {}
+                    _ => {}
+                }
+
+            }
+            _ =>
+            {
+
+            }
+            
+        }
+    }
+    return 5;
+
+}
+
+
+
+fn main() {
+    let input = read_input_file();
+    let solution_1 = problem_1(&input);
+    println!("Problem1: {:?}", solution_1);
+}

@@ -1,5 +1,6 @@
 use std::fs;
 use std::cmp;
+use std::io::{BufRead, BufReader};
 
 fn read_input_file()->String{
     let file_path = "src/input.txt";
@@ -44,6 +45,65 @@ fn problem_2(input: &String) -> i32 {
     return result;
 }
 
+/*
+ * I asked chatgpt to optimize the above code this is what it returned
+ * https://chat.openai.com/chat
+ *
+ * small adjustments had to be made but it gave the correct answer
+ * input was:
+
+    Can you optimize this rust program:
+
+    file input Input will look like this:
+    src/input.txt:
+    2-4,6-8
+    2-3,4-5
+    5-7,7-9
+    2-8,3-7
+    6-6,4-6
+    2-6,4-8
+ *
+ * and then the rust above
+ */
+
+fn parse_range(range: &str) -> (i32, i32) {
+    let mut parts = range.split('-');
+    let start = parts.next().unwrap().parse::<i32>().unwrap();
+    let end = parts.next().unwrap().parse::<i32>().unwrap();
+    (start, end)
+}
+
+fn problem_3(input: &str) -> i32 {
+    let mut result = 0;
+    for line in input.lines() {
+        let ranges: Vec<&str> = line.split(",").collect();
+        let (start1, end1) = parse_range(ranges[0]);
+        let (start2, end2) = parse_range(ranges[1]);
+        if start1 <= start2 && end1 >= end2 {
+            result += 1;
+        } else if start2 <= start1 && end2 >= end1 {
+            result += 1;
+        }
+    }
+    result
+}
+
+fn problem_4(input: &str) -> i32 {
+    let mut result = 0;
+    for line in input.lines() {
+        let ranges: Vec<&str> = line.split(",").collect();
+        let (start1, end1) = parse_range(ranges[0]);
+        let (start2, end2) = parse_range(ranges[1]);
+        if end2 < start1 || end1 < start2 {
+            result += 0;
+        }
+        else{
+            result += 1;
+        }
+    }
+    result
+}
+
 
 
 fn main() {
@@ -52,5 +112,9 @@ fn main() {
     println!("Problem1: {:?}", solution_1);
     let solution_2 = problem_2(&input);
     println!("Problem2: {:?}", solution_2);
+    let solution_3 = problem_3(&input);
+    println!("Problem3: {:?}", solution_3);
+    let solution_4 = problem_4(&input);
+    println!("Problem4: {:?}", solution_4);
 
 }
