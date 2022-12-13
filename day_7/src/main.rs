@@ -15,22 +15,18 @@ fn read_input_file()->String{
 struct Node {
     directory_name: String, 
     file_total: i32,
-    directories: Vec<Node>,
-    parent: Rc::<Option<mut Node>>,
+    directories: Vec<Rc::<Node>>,
+    parent: Rc::<Option<Node>>,
 }
 
 impl Node{
-    fn new(directory_name: String, parent: Rc<Option<mut Node>> ) -> Self {
+    fn new(directory_name: String, parent: Rc<Option<Node>> ) -> Self {
         Node {
             directory_name,
             file_total: 0,
             directories: vec![],
             parent,
         }
-    }
-    fn bidirectonal_add(mut parent: Node, child: Node){
-        // make a child node and push it
-        parent.directories.push(child);
     }
     fn add_file(mut self, size: i32){
         self.file_total += size;
@@ -41,7 +37,7 @@ impl Node{
 fn problem_1(input: &String) -> i32 {
    let commands: Vec<Vec<&str>> = input.split("\n").filter(|string| string.len() > 0).map(|x| x.split(" ").collect()).collect();
    let mut current_location = Rc::new(Some(Node::new("/".to_string(), Rc::new(None))));
-   let _head = Rc::new(current_location.as_mut());
+   let _head = current_location.clone();
     
     for command in commands{
         match command[0]{
@@ -50,13 +46,11 @@ fn problem_1(input: &String) -> i32 {
                     "cd" => {
                         match command[2] {
                             ".." => {
-                                current_location = current_location.unwrap().parent;
+                                current_location = current_location.as_ref().unwrap().parent;
+                                []
                                 
                             }
                             _ => {
-                                let parent = current_location.as_mut().unwrap();
-                                let child = Node::new(command[2].to_string(), Rc::new(Some(parent)));
-                                parent.directories.push(child);
                             }
                         }
                     }
@@ -70,8 +64,6 @@ fn problem_1(input: &String) -> i32 {
                 match command[1] {
                      "dir" => {}
                      _ => {
-                         current_location.unwrap().add_file(command[1].parse().unwrap());
-                         println!("{:?}", current_location);
                      }
 
                 }
